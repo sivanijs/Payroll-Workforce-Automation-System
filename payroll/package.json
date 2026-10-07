@@ -1,0 +1,37 @@
+{
+  "name": "payroll",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "node --test tests/attendanceScan.test.mjs tests/tasks.test.mjs tests/taskActions.test.mjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "@react-pdf/renderer": "^4.6.0",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "html5-qrcode": "^2.3.8",
+    "jose": "^6.2.8",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.31.0",
+    "next": "16.3.0",
+    "prisma": "^7.9.1",
+    "qrcode": "^1.5.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.0",
+    "tailwindcss": "^4"
+  }
+}

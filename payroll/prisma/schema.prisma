@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  admin
+  manager
+  employee
+}
+
+enum TaskStatus {
+  pending
+  in_progress
+  submitted
+  confirmed
+}
+
+model Employee {
+  id             Int             @id @default(autoincrement())
+  name           String
+  email          String          @unique
+  password       String
+  role           Role            @default(employee)
+  designation    String
+  basicSalary    Float
+  hra            Float
+  allowance      Float
+  qrCode         String?
+  dateOfJoining  DateTime
+  managerId      Int?
+  manager        Employee?       @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: SetNull)
+  teamMembers    Employee[]      @relation("EmployeeManager")
+  attendances    Attendance[]
+  leaveRequests  LeaveRequest[]  @relation("EmployeeLeaveRequests")
+  approvedLeaves LeaveRequest[]  @relation("LeaveApprovedBy")
+  payslips       Payslip[]
+  announcements  Announcement[]
+  tasksAssigned  Task[]          @relation("TaskAssignee")
+  tasksCreated   Task[]          @relation("TaskCreator")
+  tasksReviewed  Task[]          @relation("TaskReviewer")
+}
+
+model Attendance {
+  id           Int      @id @default(autoincrement())
+  employeeId   Int
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  date         DateTime
+  checkIn      DateTime?
+  checkOut     DateTime?
+  workingHours Float?
+  status       String
+
+  @@index([employeeId])
+  @@unique([employeeId, date])
+}
+
+model LeaveRequest {
+  id           Int      @id @default(autoincrement())
+  employeeId   Int
+  employee     Employee @relation("EmployeeLeaveRequests", fields: [employeeId], references: [id], onDelete: Cascade)
+  fromDate     DateTime
+  toDate       DateTime
+  reason       String
+  status       String   @default("pending")
+  approvedById Int?
+  approvedBy   Employee? @relation("LeaveApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([employeeId])
+}
+
+model Payslip {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  month       Int
+  year        Int
+  grossSalary Float
+  pf          Float
+  tax         Float
+  netSalary   Float
+  createdAt   DateTime @default(now())
+
+  @@index([employeeId])
+  @@unique([employeeId, month, year])
+}
+
+model TaxSlab {
+  id        Int   @id @default(autoincrement())
+  minIncome Float
+  maxIncome Float
+  taxRate   Float
+}
+
+model Announcement {
+  id         Int      @id @default(autoincrement())
+  message    String
+  postedById Int
+  postedBy   Employee @relation(fields: [postedById], references: [id], onDelete: Cascade)
+  scope      String
+  createdAt  DateTime @default(now())
+}
+
+model Task {
+  id            Int         @id @default(autoincrement())
+  title         String
+  description   String?
+  assignedToId   Int
+  assignedTo     Employee    @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: Cascade)
+  assignedById   Int
+  assignedBy     Employee    @relation("TaskCreator", fields: [assignedById], references: [id], onDelete: Cascade)
+  dueDate       DateTime?
+  status        TaskStatus   @default(pending)
+  completedAt   DateTime?
+  confirmedAt   DateTime?
+  reviewedAt    DateTime?
+  reviewedById  Int?
+  reviewedBy    Employee?    @relation("TaskReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewAction  String?
+  reviewComment String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([assignedToId])
+  @@index([assignedById])
+  @@index([reviewedById])
+  @@index([status])
+  @@index([dueDate])
+}
